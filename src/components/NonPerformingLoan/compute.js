@@ -2,6 +2,7 @@ import React,{Component} from 'react';
 import { Table, Button, Modal, message } from 'antd';
 import RepaymentWindow from './widgets/RepaymentWindow';
 import ComputeWindow from './widgets/ComputeWindow';
+import UpdateNonPerformingLoanWindow from './widgets/UpdateNonPerformingLoanWindow';
 import './nonPerformingLoan.css'
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -10,36 +11,63 @@ const columns = [{
     title: '帐号',
     dataIndex: 'accountNo',
     key: 'accountNo',
-    width: '20%'
+    width: '15%'
 },{
     title: '户名',
     dataIndex: 'customerName',
     key: 'customerName',
-    width: '20%'
-},{
-    title: '结息周期',
-    dataIndex: 'interestTerm',
-    key: 'interestTerm',
     width: '15%'
 },{
     title: '核销本金',
     dataIndex: 'principal',
+
     key: 'principal',
-    width: '15%'
+    width: '10%'
 },{
     title: '核销利息',
     dataIndex: 'interest',
     key: 'interest',
-    width: '15%'
+    width: '10%'
 },{
     title: '核销复利',
     dataIndex: 'compoundInterest',
     key: 'compoundInterest',
-    width: '15%'
+    width: '10%'
+},{
+    title: '罚息利率',
+    dataIndex: 'fxRate',
+    key: 'fxRate',
+    width: '10%'
+},{
+    title: '最后一期利息',
+    dataIndex: 'beforeHxInterest',
+    key: 'beforeHxInterest',
+    width: '10%'
+},{
+    title: '核销日期',
+    dataIndex: 'hxDate',
+    key: 'hxDate',
+    width: '10%'
+},{
+    title: '结息周期',
+    dataIndex: 'interestTerm',
+    key: 'interestTerm',
+    width: '10%',
+    render: text => {
+        switch (text){
+            case '0': return '按月';
+            case '1': return '按季';
+            case '2': return '按年';
+
+            default : return '后台返回前端无法解析的结息方式'
+        }
+    }
+
 }];
 
 
-
+const confirm = Modal.confirm;
+let flag = false; //用于解决刷新列表时页数不更新的问题
 export default class ComputeNonPerformingLoan extends Component {
 
     constructor(){
@@ -51,18 +79,19 @@ export default class ComputeNonPerformingLoan extends Component {
             loading: false,
             modalRepaymentWindowVisible: false,
             modalComputeWindowVisible: false,
+            modalUpdateWindowVisible: false,
             confirmLoading: false,
-            selectedRowKeys: [],  // Check here to configure the default column
+            selectedRowKeys: [],
             pageSize: 7,
             currentSelectRow: null
         };
 
-        this.handleOk = this.handleOk.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.handleTableChange = this.handleTableChange.bind(this);
         this.showRepaymentWindowModal = this.showRepaymentWindowModal.bind(this);
         this.showComputeWindowModal = this.showComputeWindowModal.bind(this);
-        // this.onSelectChange = this.onSelectChange.bind(this);
+        this.showUpdateWindowModal = this.showUpdateWindowModal.bind(this);
+        this.showDeleteModal = this.showDeleteModal.bind(this);
     }
 
     handleTableChange = (pagination, filters, sorter) => {
@@ -103,11 +132,12 @@ export default class ComputeNonPerformingLoan extends Component {
                     const pagination = {...this.state.pagination};
                     pagination.pageSize = this.state.pageSize;
                     pagination.total = data.total;
+                    if(flag) pagination.current = 1;
+                    flag = false;
                     this.setState({
                         data: data.data,
                         pagination
                     });
-                    // console.log('received data'); console.log(data.data);
                 }
                 this.setState({
                     loading: false
@@ -152,35 +182,88 @@ export default class ComputeNonPerformingLoan extends Component {
         }
     }
 
-    handleOk = () => {
-        this.setState({
-            ModalText: 'The modal dialog will be closed after two seconds',
-            confirmLoading: true,
-        });
-        setTimeout(() => {
+    showUpdateWindowModal = ()=>{
+        let record = this.state.currentSelectRow;
+        if (record === undefined || record === null || record.id === undefined ){
+            message.info('请先选中要操作的记录');
+        }
+        else {
+            //如果选中记录，则显示其内容
             this.setState({
-                modalRepaymentWindowVisible: false,
-                confirmLoading: false,
+                modalUpdateWindowVisible: true
             });
-        }, 2000);
+        }
     }
-    handleCancel = () => {
+
+    showDeleteModal = ()=>{
+        let that = this;
+        let record = this.state.currentSelectRow;
+        if (record === undefined || record === null || record.id === undefined ){
+            message.info('请先选中要操作的记录');
+        }
+        else {
+            let url = '/bldk/nonperformingloan/delete';
+            this.setState({
+                deleteRecordFlag: false
+            })
+            confirm({
+                title: '删除',
+                content: '确定删除该条贷款？删除将连带删除该条贷款的还款记录',
+                onOk() {
+                    that.setState({
+                        deleteRecordFlag:true
+                    });
+                    fetch(url,{
+                        credentials: 'include',
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', },
+                        body: JSON.stringify({
+                            data:[{
+                                id:record.id
+                            }]
+                        }),
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success !== true){
+                                message.error('删除数据失败,'+data.msg);
+                            }
+                            else{
+                                flag = true;
+                                that.fetchData({
+                                    start: 0,
+                                    page: 1
+                                });
+                                message.success('成功删除该条贷款记录');
+                            }
+                        })
+                },
+                onCancel() {},
+            });
+        }
+    }
+
+    handleCancel = (e) => {
         this.setState({
             modalRepaymentWindowVisible: false,
-            modalComputeWindowVisible: false
+            modalComputeWindowVisible: false,
+            modalUpdateWindowVisible: false
         });
+    }
+
+    refreshColumn = ()=>{
+        flag = true;
+        this.fetchData({
+            start: 0,
+            page: 1
+        })
     }
 
     render(){
 
-        // const { loading, selectedRowKeys } = this.state;
         const rowSelection = {
             type: 'radio',
-            // onChange: (selectedRowKeys, selectedRows) => {
-            //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            // },
             onSelect: (record, selected, selectedRows) => {
-                // console.log(record, selected, selectedRows);
                 this.setState({
                     currentSelectRow: record
                 });
@@ -192,7 +275,8 @@ export default class ComputeNonPerformingLoan extends Component {
                 <div className="review-buttons">
                     <Button onClick={this.showRepaymentWindowModal}>还息</Button>
                     <Button style={{marginLeft:'20px'}} onClick={this.showComputeWindowModal}>计算</Button>
-                    <Button style={{marginLeft:'20px'}} onClick={this.showModal}>销户</Button>
+                    <Button style={{marginLeft:'20px'}} onClick={this.showUpdateWindowModal}>修改</Button>
+                    <Button style={{marginLeft:'20px'}} onClick={this.showDeleteModal}>删除</Button>
                 </div>
                 <Table columns={columns}
                        rowKey={record => record.id}
@@ -205,8 +289,6 @@ export default class ComputeNonPerformingLoan extends Component {
                 />
                 <Modal title="还本还息"
                        visible={this.state.modalRepaymentWindowVisible}
-                       // onOk={this.handleOk}
-                       // confirmLoading={this.state.confirmLoading}
                        onCancel={this.handleCancel}
                        footer={null}
                        width={360}
@@ -221,6 +303,15 @@ export default class ComputeNonPerformingLoan extends Component {
                         width={360}
                 >
                     <ComputeWindow currentRow={this.state.currentSelectRow}/>
+                </Modal>
+                <Modal
+                    title="修改"
+                    visible={this.state.modalUpdateWindowVisible}
+                    onCancel={this.handleCancel}
+                    footer={null}
+                    width={360}
+                    >
+                    <UpdateNonPerformingLoanWindow currentRow={this.state.currentSelectRow} refreshColumn={this.refreshColumn.bind(this)}/>
                 </Modal>
             </div>
         )

@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { getLoggedUser } from './utils/xhr'
+import {Icon} from 'antd';
 
 class AuthorizedRoute extends React.Component {
 
@@ -14,7 +15,7 @@ class AuthorizedRoute extends React.Component {
 
         return (
             <Route {...rest} render={props => {
-                if (pending) return <div>Loading...</div>
+                if (pending) return <div><Icon type="loading" /></div>
                 if(logged === true) console.log('用户已经登陆');
                 return logged
                     ? <Component {...props} style={{height: '100%'}} /> //使conent内容充满全屏幕

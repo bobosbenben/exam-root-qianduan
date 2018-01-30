@@ -18,8 +18,8 @@ class ComputeWindow extends Component {
         console.log('子组件接收到的参数是：',this.state.record);
     }
 
-    componentDidMount(){
-
+    componentWillReceiveProps(nextProps) {
+        this.setState({record: nextProps.currentRow});
     }
 
     handleSubmit = (e) => {

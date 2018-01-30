@@ -6,6 +6,9 @@ import RepaymentNonPerformingLoan from './components/NonPerformingLoan/repayment
 import ReviewNonPerformingLoan from './components/NonPerformingLoan/review';
 import ComputeNonPerformingLoan from './components/NonPerformingLoan/compute';
 import CloseNonPerformingLoan from './components/NonPerformingLoan/close';
+import PresentType from './components/present/presentType';
+import PresentRecord from './components/present/presentRecord';
+import PresentDistribute from './components/present/presentDistribute';
 import {connect} from 'react-redux';
 
 
@@ -52,6 +55,10 @@ class App extends Component {
             case "close": return "销户";
             case "不良贷款": return "不良贷款";
             case "贷款计息": return "贷款计息";
+            case "present": return "礼品管理";
+            case "presentType": return "礼品种类";
+            case "presentDistribute": return "礼品发放";
+            case "presentRecord": return "领取记录";
 
             default: return "错误";
         }
@@ -64,6 +71,9 @@ class App extends Component {
             case "compute": return <ComputeNonPerformingLoan/>
             case "close": return <CloseNonPerformingLoan/>
             case "review": return <ReviewNonPerformingLoan/>
+            case "presentType": return <PresentType/>
+            case "presentRecord": return <PresentRecord/>
+            case "presentDistribute": return <PresentDistribute/>
 
             default: return <div>系统错误，请联系管理员</div>
         }
@@ -105,6 +115,11 @@ class App extends Component {
                             <Menu.Item key="repayment" style={{fontSize:'13px'}}>还款记录</Menu.Item>
                             <Menu.Item key="compute" style={{fontSize:'13px'}}>贷款计息</Menu.Item>
                             <Menu.Item key="close" style={{fontSize:'13px'}}>贷款销户</Menu.Item>
+                        </SubMenu>
+                        <SubMenu key="present" title={<span style={{fontSize:'16px'}}><Icon type="appstore" />礼品管理</span>}>
+                            <Menu.Item key="presentType" style={{fontSize:'13px'}}>礼品种类</Menu.Item>
+                            <Menu.Item key="presentDistribute" style={{fontSize:'13px'}}>礼品发放</Menu.Item>
+                            <Menu.Item key="presentRecord" style={{fontSize:'13px'}}>领取记录</Menu.Item>
                         </SubMenu>
                     </Menu>
                 </Sider>
