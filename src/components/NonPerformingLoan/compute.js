@@ -132,7 +132,9 @@ export default class ComputeNonPerformingLoan extends Component {
                     const pagination = {...this.state.pagination};
                     pagination.pageSize = this.state.pageSize;
                     pagination.total = data.total;
-                    if(flag) pagination.current = 1;
+                    if(flag) {
+                        pagination.current = 1;
+                    }
                     flag = false;
                     this.setState({
                         data: data.data,
@@ -188,6 +190,7 @@ export default class ComputeNonPerformingLoan extends Component {
             message.info('请先选中要操作的记录');
         }
         else {
+            console.log('current selected row: ',record);
             //如果选中记录，则显示其内容
             this.setState({
                 modalUpdateWindowVisible: true
@@ -265,9 +268,10 @@ export default class ComputeNonPerformingLoan extends Component {
             type: 'radio',
             onSelect: (record, selected, selectedRows) => {
                 this.setState({
-                    currentSelectRow: record
+                    currentSelectRow: record,
+                    selectedRowKeys: selectedRows
                 });
-            },
+            }
         };
 
         return(
@@ -307,6 +311,7 @@ export default class ComputeNonPerformingLoan extends Component {
                 <Modal
                     title="修改"
                     visible={this.state.modalUpdateWindowVisible}
+                    destroyOnClose={true}
                     onCancel={this.handleCancel}
                     footer={null}
                     width={360}

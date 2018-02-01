@@ -1,9 +1,13 @@
 import React,{Component} from 'react';
-import { Form, Icon, Input, Button, Select, DatePicker, message, Spin } from 'antd';
+import { Form, Input, Button, Select, DatePicker, message, Spin } from 'antd';
 import './widget.css';
 import moment from 'moment';
+import 'moment/locale/zh-cn';
+moment.locale('zh-cn');
 const Option = Select.Option;
 const FormItem = Form.Item;
+const dateFormat = 'YYYY-MM-DD';
+let hxDate = null;
 
 class UpdateNonPerformingLoanWindow extends Component {
 
@@ -13,7 +17,7 @@ class UpdateNonPerformingLoanWindow extends Component {
             record: props.currentRow,
             pushingData: false
         };
-
+        hxDate = props.currentRow.hxDate;
         console.log('子组件接收到的参数是：',this.state.record);
     }
 
@@ -30,6 +34,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                     pushingData: true
                 });
                 let url = '/bldk/nonperformingloan/update';
+                console.log('表单提交前选定的日期是： ',values.hxDate);
                 fetch(url,{
                     credentials: 'include',
                     method: 'POST',
@@ -41,7 +46,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                             interest: values.interest,
                             compoundInterest: values.compoundInterest,
                             fxRate: values.fxRate,
-                            hxDate: values.hxDate,
+                            hxDate: hxDate,
                             beforeHxInterest: values.beforeHxInterest,
                             interestTerm: values.interestTerm
                         }]
@@ -57,6 +62,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                         }
                         if (data.success === true){
                             message.success(data.msg);
+                            this.props.form.resetFields();
                             this.props.refreshColumn();
                         }
                     });
@@ -64,8 +70,12 @@ class UpdateNonPerformingLoanWindow extends Component {
         });
     }
 
+    onHxDateChange = (date,dateString)=>{
+        hxDate = dateString;
+    }
+
     render(){
-        const dataFormat = 'YYYY-MM-DD';
+
         const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
@@ -98,7 +108,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                         label="贷款帐号"
                     >
                         {getFieldDecorator('accountNo', {
-                            initialValue: this.state.record.accountNo
+                            initialValue: this.props.currentRow.accountNo
                         })(
                             <Input disabled={true}/>
                         )}
@@ -107,7 +117,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                         label="户名"
                     >
                         {getFieldDecorator('customerName', {
-                            initialValue: this.state.record.customerName
+                            initialValue: this.props.currentRow.customerName
                         })(
                             <Input disabled={true}/>
                         )}
@@ -116,10 +126,10 @@ class UpdateNonPerformingLoanWindow extends Component {
                         label="核销时本金"
                     >
                         {getFieldDecorator('principal', {
-                            initialValue: this.state.record.principal,
                             rules: [{
                                 required: true, message: '请输入核销时本金!',
                             }],
+                            initialValue: this.props.currentRow.principal
                         })(
                             <Input addonBefore="￥" />
                         )}
@@ -128,10 +138,10 @@ class UpdateNonPerformingLoanWindow extends Component {
                         label="核销时利息"
                     >
                         {getFieldDecorator('interest', {
-                            initialValue: this.state.record.interest,
                             rules: [{
                                 required: true, message: '请输入核销时利息!',
                             }],
+                            initialValue: this.props.currentRow.interest
                         })(
                             <Input  addonBefore="￥" />
                         )}
@@ -140,10 +150,10 @@ class UpdateNonPerformingLoanWindow extends Component {
                         label="核销时复利"
                     >
                         {getFieldDecorator('compoundInterest', {
-                            initialValue: this.state.record.compoundInterest,
                             rules: [{
                                 required: true, message: '请输入核销时复利!',
                             }],
+                            initialValue: this.props.currentRow.compoundInterest
                         })(
                             <Input  addonBefore="￥" />
                         )}
@@ -155,7 +165,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                             rules: [{
                                 required: true, message: '请输入罚息利率!',
                             }],
-                            initialValue: this.state.record.fxRate
+                            initialValue: this.props.currentRow.fxRate
                         })(
 
                             <Input style={{ width: '100%' }} addonBefore="‰" />
@@ -166,9 +176,9 @@ class UpdateNonPerformingLoanWindow extends Component {
                     >
                         {getFieldDecorator('hxDate', {
                             rules: [{ type: 'object', required: true, message: '请输入核销日期!' }],
-                            initialValue: moment(this.state.record.hxDate,dataFormat)
+                            initialValue: moment(this.props.currentRow.hxDate,dateFormat)
                         })(
-                            <DatePicker style={{width:'50%'}}/>
+                            <DatePicker style={{width:'50%'}} onChange={this.onHxDateChange.bind(this)}/>
                         )}
                     </FormItem>
                     <FormItem
@@ -178,7 +188,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                             rules: [{
                                 required: true, message: '核销前最后一次结息时的利息总金额!',
                             }],
-                            initialValue: this.state.record.beforeHxInterest
+                            initialValue: this.props.currentRow.beforeHxInterest
                         })(
 
                             <Input style={{ width: '100%' }} addonBefore="￥" />
@@ -189,7 +199,7 @@ class UpdateNonPerformingLoanWindow extends Component {
                     >
                         {getFieldDecorator('interestTerm', {
                             rules: [{ required: true, message: '请选择结息周期!', whitespace: true }],
-                            initialValue: this.state.record.interestTerm
+                            initialValue: this.props.currentRow.interestTerm
                         })(
                             <Select style={{ width: '50%' }}>
                                 <Option value="0">按月</Option>
@@ -206,5 +216,20 @@ class UpdateNonPerformingLoanWindow extends Component {
         )
     }
 }
-
-export default Form.create()(UpdateNonPerformingLoanWindow);
+export default Form.create({
+    // mapPropsToFields(props) {
+    //     return {
+    //         accountNo: Form.createFormField({value: props.currentRow.accountNo}),
+    //         customerName: Form.createFormField({value: props.currentRow.customerName}),
+    //         principal: Form.createFormField({
+    //             value: props.currentRow.principal
+    //         }),
+    //         interest: Form.createFormField({value: props.currentRow.interest}),
+    //         compoundInterest: Form.createFormField({value: props.currentRow.compoundInterest}),
+    //         fxRate: Form.createFormField({value: props.currentRow.fxRate}),
+    //         hxRate: Form.createFormField({defaultValue: moment(props.currentRow.hxDate,dateFormat)}),
+    //         beforeHxInterest: Form.createFormField({value: props.currentRow.beforeHxInterest}),
+    //         interestTerm: Form.createFormField({value: props.currentRow.interestTerm})
+    //     };
+    // },
+})(UpdateNonPerformingLoanWindow);
