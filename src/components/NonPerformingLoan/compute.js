@@ -11,12 +11,12 @@ const columns = [{
     title: '帐号',
     dataIndex: 'accountNo',
     key: 'accountNo',
-    width: '15%'
+    width: '10%'
 },{
     title: '户名',
     dataIndex: 'customerName',
     key: 'customerName',
-    width: '15%'
+    width: '10%'
 },{
     title: '核销本金',
     dataIndex: 'principal',
@@ -34,9 +34,19 @@ const columns = [{
     key: 'compoundInterest',
     width: '10%'
 },{
+    title: '2014-7-14（含）之前的罚息利率',
+    dataIndex: 'lastFxRate',
+    key: 'lastFxRate',
+    width: '15%'
+},{
     title: '罚息利率',
     dataIndex: 'fxRate',
     key: 'fxRate',
+    width: '5%'
+},{
+    title: '正常贷款利率',
+    dataIndex: 'originalRate',
+    key: 'originalRate',
     width: '10%'
 },{
     title: '最后一期利息',
@@ -47,12 +57,12 @@ const columns = [{
     title: '核销日期',
     dataIndex: 'hxDate',
     key: 'hxDate',
-    width: '10%'
+    width: '5%'
 },{
     title: '结息周期',
     dataIndex: 'interestTerm',
     key: 'interestTerm',
-    width: '10%',
+    width: '5%',
     render: text => {
         switch (text){
             case '0': return '按月';
@@ -110,7 +120,6 @@ export default class ComputeNonPerformingLoan extends Component {
         });
     }
     fetchData = (params = {}) => {
-        console.log('params:', params);
         this.setState({ loading: true });
 
         let url = '/bldk/nonperformingloan/get';

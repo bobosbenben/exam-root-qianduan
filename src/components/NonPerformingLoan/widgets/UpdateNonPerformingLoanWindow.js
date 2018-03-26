@@ -34,7 +34,6 @@ class UpdateNonPerformingLoanWindow extends Component {
                     pushingData: true
                 });
                 let url = '/bldk/nonperformingloan/update';
-                console.log('表单提交前选定的日期是： ',values.hxDate);
                 fetch(url,{
                     credentials: 'include',
                     method: 'POST',

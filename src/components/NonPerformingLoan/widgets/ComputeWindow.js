@@ -12,7 +12,8 @@ class ComputeWindow extends Component {
             pushingData: false,
             principal: 0,
             interest: 0,
-            compoundInterest: 0
+            compoundInterest: 0,
+            normalInterest: 0
         };
 
         console.log('子组件接收到的参数是：',this.state.record);
@@ -55,7 +56,8 @@ class ComputeWindow extends Component {
                             this.setState({
                                 principal: data.data.principal,
                                 interest: data.data.interest,
-                                compoundInterest: data.data.compoundInterest
+                                compoundInterest: data.data.compoundInterest,
+                                normalInterest: data.data.normalInterest
                             })
                         }
                     });
@@ -90,6 +92,7 @@ class ComputeWindow extends Component {
                     <p>待还本金: &nbsp;&nbsp;{this.state.principal}</p>
                     <p>待还利息: &nbsp;&nbsp;{this.state.interest}</p>
                     <p>待还复利: &nbsp;&nbsp;{this.state.compoundInterest}</p>
+                    <p>自核销日起，按原利率产生利息：{this.state.normalInterest}</p>
                 </Card>
             </Spin>
         )

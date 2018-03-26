@@ -88,7 +88,7 @@ class LoginWindow extends Component {
                         <img src={require('../../image/logo1.png')} style={{width:'40px', height:'45px', paddingBottom:'10px'}}/>
                     </div>
                     <div style={{marginTop:'5px',marginLeft:'10px'}}>
-                        <h2>核销贷款利息试算系统</h2>
+                        <h2>礼品领取登记系统</h2>
                     </div>
                 </div>
 

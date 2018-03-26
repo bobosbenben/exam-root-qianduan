@@ -24,6 +24,11 @@
   font-size: large;
 }
 
+.head{
+  display: flex;
+  justify-content: space-between;
+}
+
 .header-logo{
   display: flex;
   flex-direction: row;

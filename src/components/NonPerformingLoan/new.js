@@ -39,7 +39,9 @@ class NewNonPerformingLoan extends Component {
                             accountNo: values.accountNo,
                             compoundInterest: values.compoundInterest,
                             customerName: values.customerName,
+                            originalRate: values.originalRate,
                             fxRate: values.fxRate,
+                            lastFxRate: values.lastFxRate,
                             hxDate: values.hxDate,
                             interest: values.interest,
                             interestTerm: values.interestTerm,
@@ -170,6 +172,34 @@ class NewNonPerformingLoan extends Component {
                     </FormItem>
                     <FormItem
                         {...formItemLayout}
+                        label="原贷款利率"
+                    >
+                        {getFieldDecorator('originalRate', {
+                            rules: [{
+                                required: true, message: '请输入贷款的原利率!',
+                            }],
+                            initialValue: 0
+                        })(
+
+                            <Input style={{ width: '100%' }} addonBefore="‰" />
+                        )}
+                    </FormItem>
+                    <FormItem
+                        {...formItemLayout}
+                        label="2014-7-15前的罚息利率"
+                    >
+                        {getFieldDecorator('lastFxRate', {
+                            rules: [{
+                                required: true, message: '请输入罚息利率!',
+                            }],
+                            initialValue: 15
+                        })(
+
+                            <Input style={{ width: '100%' }} addonBefore="‰" />
+                        )}
+                    </FormItem>
+                    <FormItem
+                        {...formItemLayout}
                         label="罚息利率"
                     >
                         {getFieldDecorator('fxRate', {
@@ -211,7 +241,7 @@ class NewNonPerformingLoan extends Component {
                     >
                         {getFieldDecorator('interestTerm', {
                             rules: [{ required: true, message: '请选择结息周期!', whitespace: true }],
-                            initialValue: '0'
+                            initialValue: '1'
                         })(
                             <Select style={{ width: '50%' }}>
                                 <Option value="0">按月</Option>

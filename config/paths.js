@@ -34,7 +34,7 @@ const getPublicUrl = appPackageJson =>
 function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson);
   const servedUrl =
-    envPublicUrl || (publicUrl ? url.parse(publicUrl).pathname : '/');
+    envPublicUrl || (publicUrl ? url.parse(publicUrl).pathname : './');
   return ensureSlash(servedUrl, true);
 }
 
@@ -42,7 +42,7 @@ function getServedPath(appPackageJson) {
 module.exports = {
   dotenv: resolveApp('.env'),
   //appBuild: resolveApp('build'),
-  appBuild: '/home/project/exam-root/exam/src/main/webapp/ui/',
+  appBuild: 'D:\\IdeaProjects\\exam-root-master\\exam\\src\\main\\webapp\\ui\\',
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveApp('src/index.js'),
